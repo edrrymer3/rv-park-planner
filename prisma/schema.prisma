@@ -1,0 +1,63 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Park {
+  id          String   @id @default(cuid())
+  name        String
+  acreage     Float?
+  description String?
+  imageUrl    String?  // uploaded satellite/sketch image
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  sites        Site[]
+  phases        Phase[]
+  subscription  Subscription?
+}
+
+model Site {
+  id       String  @id @default(cuid())
+  parkId   String
+  label    String  // A1, A2, B1, etc.
+  type     String  @default("back-in") // back-in | pull-through
+  x        Float   // canvas position
+  y        Float
+  width    Float   @default(60)
+  height   Float   @default(30)
+  phaseId  String?
+  amenities String? // JSON array: ["water", "electric", "sewer"]
+
+  park  Park   @relation(fields: [parkId], references: [id], onDelete: Cascade)
+  phase Phase? @relation(fields: [phaseId], references: [id])
+}
+
+model Phase {
+  id     String @id @default(cuid())
+  parkId String
+  name   String // "Phase 1", "Phase 2", etc.
+  color  String @default("#3B82F6")
+  order  Int    @default(1)
+
+  park  Park   @relation(fields: [parkId], references: [id], onDelete: Cascade)
+  sites Site[]
+}
+
+model Subscription {
+  id         String   @id @default(cuid())
+  parkId     String   @unique
+  plan       String   @default("basic") // basic | pro | enterprise
+  status     String   @default("trialing") // trialing | active | canceled
+  stripeId   String?  // Stripe subscription ID (test mode)
+  createdAt  DateTime @default(now())
+
+  park Park @relation(fields: [parkId], references: [id], onDelete: Cascade)
+}
