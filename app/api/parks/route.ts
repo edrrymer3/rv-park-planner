@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { ensureDb } from "@/lib/db-init";
 
 export async function GET() {
   try {
+    await ensureDb();
     const parks = await prisma.park.findMany({
       include: {
         _count: { select: { sites: true, phases: true } },
@@ -20,6 +22,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    await ensureDb();
     const body = await request.json();
     const { name, acreage, description } = body;
 
@@ -32,6 +35,7 @@ export async function POST(request: Request) {
         name: name.trim(),
         acreage: acreage ? parseFloat(acreage) : null,
         description: description?.trim() || null,
+        updatedAt: new Date(),
       },
     });
 

@@ -18,6 +18,7 @@ interface ParkSummary {
 export default function HomePage() {
   const [parks, setParks] = useState<ParkSummary[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isDemo] = useState(() => typeof window !== "undefined" && window.location.hostname.includes("vercel.app"));
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState("");
   const [newAcreage, setNewAcreage] = useState("");
@@ -86,6 +87,14 @@ export default function HomePage() {
       </header>
 
       <main className="max-w-6xl mx-auto px-6 py-8">
+        {/* Demo banner */}
+        <div className="flex items-center gap-2 text-sm bg-yellow-900/30 border border-yellow-700/50 text-yellow-300 rounded-xl px-4 py-2.5 mb-6">
+          <span>⚠️</span>
+          <span>
+            <strong>Preview Mode</strong> — SQLite runs in serverless memory. Data persists during your session but resets on cold starts.
+            Connect a dedicated Neon DB for full persistence.
+          </span>
+        </div>
         {/* Stats bar */}
         {parks.length > 0 && (
           <div className="grid grid-cols-3 gap-4 mb-8">
